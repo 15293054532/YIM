@@ -142,7 +142,6 @@ public class ConnectGraphUtil {
 
     /**
      * 计算整个节点(包括子节点)的宽度
-     *
      * @param node
      * @return
      */

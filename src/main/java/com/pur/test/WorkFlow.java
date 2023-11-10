@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.pur.entity.Relation;
 import com.pur.tool.ConnectGraphUtil;
-import com.pur.formplugin.RelationTool;
 import kd.bos.bill.AbstractBillPlugIn;
 import kd.bos.workflow.design.plugin.IWorkflowDesigner;
 
@@ -19,14 +18,15 @@ public class WorkFlow extends AbstractBillPlugIn implements IWorkflowDesigner {
         // 获取树形单据体数据
         JSONArray treeEntity = this.getView().getFormShowParameter().getCustomParam("entity");
         List<Relation> relations = convert(treeEntity);
-        ConnectGraphUtil.createRelation(relations);
+
+        ConnectGraphUtil.createRelation(relations);//位置调整工具类
         StringBuilder relationXml = new StringBuilder();
         String xml = spliceXml(relations, relationXml);
         map.put("graph_xml", xml);
         return map;
     }
 
-    private String spliceXml(List<Relation> relations, StringBuilder xml) {
+    private String spliceXml(List<Relation> relations, StringBuilder xml) {//建立图形
         for (Relation relation : relations) {
             xml.append(spliceModel(relation));
             if (relation.getParentId() != null && relation.getParentId() != 0) {
@@ -49,7 +49,7 @@ public class WorkFlow extends AbstractBillPlugIn implements IWorkflowDesigner {
                 "</mxGraphModel>";
     }
 
-    private String spliceLine(Relation relation) {
+    private String spliceLine(Relation relation) {//连线
         return "<mxCell id=\"relation_line_" + relation.getId() + "\"" +
                 "        style=\"edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;jettySize=auto;orthogonalLoop=1;strokeColor=#A1CFFF!important;;\"" +
                 "        type=\"SequenceFlow\" " +
@@ -59,19 +59,9 @@ public class WorkFlow extends AbstractBillPlugIn implements IWorkflowDesigner {
                 "        target=\"" + relation.getId() + "\">" +
                 "    <mxGeometry relative=\"1\" as=\"geometry\"/>" +
                 "</mxCell>";
-//                "<mxCell id=\"relation_line_" + relation.getId() + "_child" +"\"" +
-//                "       parent=\"relation_line_" + relation.getId() + "\"" +
-//                "       vertex=\"1\" " +
-//                "       style=\"shape=ierp.billrelation.IconComplete;\"/>" +
-//                "       <Object entityNumber=\"tpv_my_purchasereq\" businessKey =\"1810250716527200256\" type =\"complete\" " +
-//                "       title=\"下推已完成\" as =\"properties\"/>" +
-//                "       <mxGeometry width=\"24.0\" height=\"24.0\" x = \"0.0\" y = \"0.0\" relative = \"true\" as = \"geometry\">" +
-//                "           <mxPoint x =\"-32.0\" y = \"-12.0\" as = \"offset\" / >" +
-//                "       </mxGeometry>" +
-//                "</mxCell>";
     }
 
-    private String spliceModel(Relation relation) {
+    private String spliceModel(Relation relation) {//节点信息
         String style = "shape=billCard";
         return "<mxCell id=\"" + relation.getId() + "\"" +
                 " value=\"" + "\"" +
@@ -129,7 +119,7 @@ public class WorkFlow extends AbstractBillPlugIn implements IWorkflowDesigner {
             } else {
                 relation.setStatus("null");
             }
-
+            //父节点图形设置
             relation.setParentId(obj.getLong("pid"));
             relation.setTargets(new ArrayList<>());
             relation.setVirtual(false);
@@ -151,7 +141,7 @@ public class WorkFlow extends AbstractBillPlugIn implements IWorkflowDesigner {
                 }
             }
         }
-
+        //虚拟根节点
         Relation virtualRoot = new Relation();
         virtualRoot.setId(11111L);
         virtualRoot.setVirtual(true);

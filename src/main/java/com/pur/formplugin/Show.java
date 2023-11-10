@@ -17,20 +17,15 @@ public class Show extends AbstractBillPlugIn {
     public void itemClick(ItemClickEvent evt) {
         super.itemClick(evt);
         String key = evt.getItemKey();
-        if (StringUtils.equals("tpv_diagram", key)) {
+        if (StringUtils.equals("tpv_diagram", key)) {//点击按钮
             FormShowParameter showParameter = new FormShowParameter();
-            showParameter.setFormId("tpv_my_documentdiag");
-//            showParameter.setCustomParam("id",this.getModel().getDataEntity(true).getPkValue());
-//            showParameter.setCustomParam("entityId",this.getView().getEntityId());
+            showParameter.setFormId("tpv_my_documentdiag");//动态表单
             DynamicObjectCollection treeData = this.getModel().getEntryEntity("tpv_my_purchasereq_tr");
             showParameter.setClientParam(ViewFlowchartConstant.PROCINSTID, treeData);
             showParameter.getOpenStyle().setShowType(ShowType.Modal);
             HashMap<String, Object> map = new HashMap<>();
             map.put("entity", treeData);
-            showParameter.setCustomParams(map);
-//            showParameter.setStatus(OperationStatus.ADDNEW);
-//            showParameter.setClientParam(ViewFlowchartConstant.PROCINSTID,this.getModel().getDataEntity(true).getPkValue());
-//            showParameter.getOpenStyle().setShowType(ShowType.Modal);
+            showParameter.setCustomParams(map);//传参
             this.getView().showForm(showParameter);
         }
 
