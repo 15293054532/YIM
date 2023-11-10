@@ -134,9 +134,9 @@ public class Warning extends ExpiredWarnPlugin {
             QFilter filters = new QFilter("tpv_duedate", "<=", DateUtils.getNextDay(new Date(), day));//需求日期
 //            QFilter filters_pledge = new QFilter("pledgeenddate", "<=", DateUtils.getNextDay(new Date(), day));
             QFilter statusFilters = new QFilter("billstatus", "=", BillStatusEnum.AUDIT.getValue());
-//            QFilter billFilters = new QFilter("draftbillstatus", "in", new String[]{DraftBillStatusEnum.REGISTERED.getValue(), DraftBillStatusEnum.COLLOCATED.getValue()});
+            QFilter billFilters = new QFilter("draftbillstatus", "in", new String[]{DraftBillStatusEnum.REGISTERED.getValue(), DraftBillStatusEnum.COLLOCATED.getValue()});
 //            QFilter billFiltersOfPledge = new QFilter("draftbillstatus", "=", DraftBillStatusEnum.PLEDGED.getValue());
-//            DynamicObject[] bills = TmcDataServiceHelper.load("tpv_my_purchord", this.getFields(), new QFilter[]{filters, statusFilters, orgfilter, billFilters}, "tpv_duedate");
+            DynamicObject[] bills = TmcDataServiceHelper.load("tpv_my_purchord", this.getFields(), new QFilter[]{filters, statusFilters, orgfilter, billFilters}, "tpv_duedate");
 //            DynamicObject[] billsOfPledge = TmcDataServiceHelper.load("tpv_my_purchord", this.getFields(), new QFilter[]{filters_pledge, statusFilters, orgfilter, billFiltersOfPledge}, "pledgeenddate");
             List<DynamicObject> allBills = new ArrayList();
 //            allBills.addAll(Arrays.asList(bills));
