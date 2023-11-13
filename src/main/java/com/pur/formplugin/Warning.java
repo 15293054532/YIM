@@ -85,7 +85,6 @@ public class Warning extends AbstractTmcBillEdit {
             for (Iterator<Long> iterator = sourceCurrencys.iterator(); iterator.hasNext();) {
                 sourceCurrency = iterator.next();
                 value = BaseDataServiceHelper.getExchangeRate(rateTable.getLong("id"), sourceCurrency, reportCurrency.getLong("id"), new Date());
-//                value = BaseDataServiceHelper.getExchangeRate(rateTable.getLong("id"), sourceCurrency, reportCurrency.getLong("id"),new Timestamp(new Date().getTime()));
                 System.out.println(value);
                 System.out.println(rateTable);
                 System.out.println(sourceCurrency);
@@ -102,16 +101,26 @@ public class Warning extends AbstractTmcBillEdit {
             vs.addField("tpv_contract");//合同号
             vs.addField("tpv_appdate");//申请日期
             vs.addField("tpv_stacurrency");//本位币
-            vs.addField("tpv_amount");//金额
             vs.addField("tpv_setcurrency");//结算金
             vs.addField("tpv_maturity");//单据到期
             vs.addField("tpv_user");//申请人
             vs.addField("tpv_full");//供应商
             vs.addField("tpv_auditor");//审核人
             for (DynamicObject bill : payableBills) {
-                vs.addRow(bill.get("tpv_org.name"), bill.get("tpv_billtypefield.name"), bill.get("tpv_usage"), bill.get("billstatus"),
-                        bill.get("tpv_contract"), bill.get("tpv_applydate"), bill.get("tpv_currency.name"), bill.get("tpv_amoun"), bill.get("tpv_duedate"),
-                        bill.get("tpv_applier.name"), bill.get("tpv_supplier.name"), bill.get("auditor.name"));
+                vs.addRow(
+                        bill.get("tpv_org.id"),
+                        bill.get("tpv_billtypefield.name"),
+                        bill.get("tpv_usage"),
+                        bill.get("billstatus"),
+                        bill.get("tpv_contract"),
+                        bill.get("tpv_applydate"),
+                        bill.get("tpv_currency.id"),
+                        bill.get("tpv_amoun"),
+                        bill.get("tpv_duedate"),
+                        bill.get("tpv_applier.name"),
+                        bill.get("tpv_supplier.name"),
+                        bill.get("auditor.name")
+                );
             }
             model.batchCreateNewEntryRow("tpv_entryentity", vs);
             model.endInit();
