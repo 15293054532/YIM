@@ -1,7 +1,5 @@
 package com.pur.formplugin;
 
-
-import kd.bos.bill.AbstractBillPlugIn;
 import kd.bos.context.RequestContext;
 import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.dataentity.resource.ResManager;
@@ -11,15 +9,12 @@ import kd.bos.form.control.Control;
 import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.QueryServiceHelper;
 import kd.bos.servicehelper.basedata.BaseDataServiceHelper;
-import kd.bos.workflow.design.plugin.IWorkflowDesigner;
 import kd.fi.bcm.fel.common.ArrayUtils;
-import kd.tmc.cdm.formplugin.index.ExpiredWarnPlugin;
 import kd.tmc.fbp.common.enums.BillStatusEnum;
 import kd.tmc.fbp.common.helper.TmcDataServiceHelper;
 import kd.tmc.fbp.common.util.DateUtils;
 import kd.tmc.fbp.formplugin.edit.AbstractTmcBillEdit;
 
-import java.sql.Timestamp;
 import java.util.Date;
 import java.math.BigDecimal;
 import java.util.*;
@@ -65,7 +60,7 @@ public class Warning extends AbstractTmcBillEdit {
         AbstractFormDataModel model = (AbstractFormDataModel) this.getModel();
         model.deleteEntryData("tpv_entryentity");//卡片单据体
         DynamicObject rateTable = (DynamicObject) this.getModel().getValue("tpv_ratetable");//卡片汇率表
-        DynamicObject reportCurrency = (DynamicObject) this.getModel().getValue("tpv_reportcurrency");//卡片报告币别
+        DynamicObject reportCurrency = (DynamicObject) this.getModel().getValue("tpv_reportcurrency");//卡片结算币别
         if (rateTable == null) {
             this.getView().showTipNotification(ResManager.loadKDString("汇率表不能为空。", "ExpiredWarnPlugin_1", "tmc-cdm-formplugin"));//插件基类
         } else if (reportCurrency == null) {
@@ -82,17 +77,13 @@ public class Warning extends AbstractTmcBillEdit {
 
             Long sourceCurrency;
             BigDecimal value;
-            for (Iterator<Long> iterator = sourceCurrencys.iterator(); iterator.hasNext();) {
+            for (Iterator<Long> iterator = sourceCurrencys.iterator(); iterator.hasNext(); ) {
                 sourceCurrency = iterator.next();
                 value = BaseDataServiceHelper.getExchangeRate(rateTable.getLong("id"), sourceCurrency, reportCurrency.getLong("id"), new Date());
-                System.out.println(value);
-                System.out.println(rateTable);
-                System.out.println(sourceCurrency);
-                System.out.println(reportCurrency);
                 if (value == null) {
                     value = BigDecimal.ZERO;
                 }
-                sourceCurrencyMap.put(sourceCurrency,value);
+                sourceCurrencyMap.put(sourceCurrency, value);
             }
             vs.addField("tpv_org");//采购组织
             vs.addField("tpv_type");//采购类型
@@ -135,8 +126,7 @@ public class Warning extends AbstractTmcBillEdit {
             return null;
         } else {
             QFilter filters = new QFilter("tpv_duedate", "<=", DateUtils.getNextDay(new Date(), day));//单据到期
-            System.out.println(filters);
-            QFilter statusFilters = new QFilter("billstatus", "=", BillStatusEnum.AUDIT.getValue());
+            QFilter statusFilters = new QFilter("billstatus", "=", BillStatusEnum.AUDIT.getValue());//状态
             DynamicObject[] bills = TmcDataServiceHelper.load("tpv_my_purchasereq", getFields(), new QFilter[]{filters, statusFilters}, "tpv_duedate");
             List<DynamicObject> allBills = new ArrayList<>(Arrays.asList(bills));
             return allBills.toArray(new DynamicObject[0]);
