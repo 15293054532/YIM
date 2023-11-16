@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.dataentity.resource.ResManager;
 import kd.bos.dataentity.utils.StringUtils;
@@ -43,6 +44,9 @@ import kd.tmc.fbp.common.util.EmptyUtil;
  * @author 84514
  */
 public class CardLine extends AbstractFormPlugin implements BeforeF7SelectListener {
+
+    public CardLine() {
+    }
 
     private Set<String> getSelectProps() {
         Set<String> props = new HashSet(16);
@@ -82,6 +86,7 @@ public class CardLine extends AbstractFormPlugin implements BeforeF7SelectListen
                 this.updateCreditChart();
                 break;
             case "tpv_stacurrency":
+                this.updateCreditChart();
             case "tpv_currencyunit":
             case "tpv_supplier":
                 this.updateCreditChart();
@@ -148,9 +153,10 @@ public class CardLine extends AbstractFormPlugin implements BeforeF7SelectListen
         Long divideCount = this.getCurrencyUnit();
         QFilter companyFilter = this.getOrgFilter();
         QFilter supplierFilter = this.getSupplierFilter();
+        QFilter qFilter = this.getcurrencyFilter();
         QFilter sum = (new QFilter("tpv_my_purchasereq_sp.tpv_applyqty", ">", 0));
         QFilter statusFilter = (new QFilter("billstatus", "=", BillStatusEnum.AUDIT.getValue()));
-        DynamicObject[] creditLimits = TmcDataServiceHelper.load("tpv_my_purchasereq", String.join(",", this.getSelectProps()), new QFilter[]{statusFilter, sum, companyFilter, supplierFilter}, "billno desc");
+        DynamicObject[] creditLimits = TmcDataServiceHelper.load("tpv_my_purchasereq", String.join(",", this.getSelectProps()), new QFilter[]{statusFilter, sum, companyFilter, supplierFilter, qFilter}, "billno desc");
         if (EmptyUtil.isEmpty(creditLimits)) {
             return Boolean.FALSE;
         } else {
@@ -185,17 +191,26 @@ public class CardLine extends AbstractFormPlugin implements BeforeF7SelectListen
     private QFilter getSupplierFilter() {//供应商过滤条件
         DynamicObject banks = (DynamicObject) this.getModel().getValue("tpv_supplier");
         QFilter ofilter = null;
-        if(banks != null) {
+        if (banks != null) {
             ofilter = new QFilter("tpv_supplier", "=", banks.getPkValue());
         }
         return ofilter;
     }
 
     private QFilter getOrgFilter() {//组织过滤条件
-        DynamicObject company = (DynamicObject)this.getModel().getValue("tpv_company");
+        DynamicObject company = (DynamicObject) this.getModel().getValue("tpv_company");
         QFilter ofilter = null;
         if (company != null) {
             ofilter = new QFilter("tpv_org", "=", company.getPkValue());
+        }
+        return ofilter;
+    }
+
+    private QFilter getcurrencyFilter() {//币别过滤条件
+        DynamicObject company = (DynamicObject) this.getModel().getValue("tpv_stacurrency");
+        QFilter ofilter = null;
+        if (company != null) {
+            ofilter = new QFilter("tpv_currency", "=", company.getPkValue());
         }
         return ofilter;
     }
@@ -221,8 +236,14 @@ public class CardLine extends AbstractFormPlugin implements BeforeF7SelectListen
         BigDecimal[] dataSum = new BigDecimal[charDataList.size()];
         BigDecimal[] useData = new BigDecimal[charDataList.size()];
         for (int i = 0; i < charDataList.size(); i++) {
-            dataSum[i] = charDataList.get(i)[0];
-            useData[i] = charDataList.get(i)[1];
+            BigDecimal[] arr = charDataList.get(i);
+            if (arr.length >= 2) {
+                dataSum[i] = arr[0];
+                useData[i] = arr[1];
+            } else {
+                dataSum[i] = arr[0];
+                useData[i] = arr[0];
+            }
         }
         Axis taskNumberAxis = customchart.createYAxis(ResManager.loadKDString("订单数量", "CreditCardPlugin_0", "tmc-creditm-formplugin"), AxisType.value);
         BarSeries seriesNormal = customchart.createBarSeries(ResManager.loadKDString("申请数量", "CreditCardPlugin_2", "tmc-creditm-formplugin"));
@@ -343,7 +364,7 @@ public class CardLine extends AbstractFormPlugin implements BeforeF7SelectListen
             } else {
                 String currencyUnit = (String) this.getModel().getValue("tpv_currencyunit");
                 if (StringUtils.isBlank(currencyUnit)) {
-                    this.getView().showTipNotification(ResManager.loadKDString("请选择货币单位", "CreditCardPlugin_9", "tmc-creditm-formplugin"));
+                    this.getView().showTipNotification(ResManager.loadKDString("请选择数量单位", "CreditCardPlugin_9", "tmc-creditm-formplugin"));
                     return Boolean.FALSE;
                 } else {
                     return Boolean.TRUE;
